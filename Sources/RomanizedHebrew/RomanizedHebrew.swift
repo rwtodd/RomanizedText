@@ -1,36 +1,5 @@
 import RegexBuilder
 
-/*
-Romanized Hebrew library
-
-RomanizedHebrew converts the romanization menthod used by the
-English occultists of the 19th and 20th centuries. It is as follows:
-
-  A  = aleph   B  = beth    G  = gimel    D  = dalet
-  H  = heh     V  = vav     Z  = zayin    Ch = chet
-  T  = teth    I  = yod     K  = kaf      L  = lamed
-  M  = mem     N  = nun     S  = samekh   O  = ayin
-  P  = peh     Tz = tzaddi  Q  = qoph     R  = resh
-  Sh = shin    Th = tav
-
-  Ligatures:
-  Ii = yod-yod   Vi = vav-yod     Vv = vav-vav
-
-  Niqqud:
-  ;  = Sh'va                *  = Dagesh
-  \\ =  Kubutz              `  = Holam
-  1  = Hiriq                2  = Zeire
-  3  = Segol                ;3 = Reduced Segol
-  _  = Patach               ;_ = Reduced Patach
-  7  = Kamatz               ;7 = Reduced Kamatz
-  Shl = Shin dot left       Shr = Shin dot right
-      ;; = escape an actual semicolon
-
-Letters which can be final can take a 'f' or 'i' prefix to
-force the interpretation to be 'final' or 'initial'... otherwise
-a letter at the end of a word is considered final.
-*/
-
 let transTable: [String:String] = [   // transliteration table
   // aleph, beth, gimel, dalet
   "A" : "\u{05d0}", "B" : "\u{05d1}", "G" : "\u{05d2}", "D" : "\u{05d3}",
@@ -67,7 +36,7 @@ let transTable: [String:String] = [   // transliteration table
   "Shr" : "\u{05e9}\u{05c1}"  // Shin dot right
 ]
 
-let NIQQUD = ChoiceOf {
+let niqqudRx = ChoiceOf {
     Regex {
         ";"
         Optionally(.anyOf(";37_"))
@@ -75,10 +44,10 @@ let NIQQUD = ChoiceOf {
     One(.anyOf("1237_*\\`"))
 }
 
-let INFERRED_FINAL = Regex {
+let inferredFinalRx = Regex {
     ChoiceOf { "K"; "M"; "N"; "P"; "Tz" }
     Lookahead {
-        ZeroOrMore(NIQQUD,.possessive)
+        ZeroOrMore(niqqudRx,.possessive)
         ChoiceOf {
             One(.word.inverted)
             Anchor.endOfSubjectBeforeNewline
@@ -86,16 +55,16 @@ let INFERRED_FINAL = Regex {
     }
 }
 
-let TRANSLITERATE = Regex {
+let transliterationRx = Regex {
     Capture {
         ("A"..."Z")
         ZeroOrMore(.anyOf("fhilvz"), .possessive)
     }
     Capture {
-        Optionally(NIQQUD, .possessive)
+        Optionally(niqqudRx, .possessive)
     }
     Capture {
-        Optionally(NIQQUD, .possessive)
+        Optionally(niqqudRx, .possessive)
     }
 }
 
@@ -104,13 +73,47 @@ func defLookup(_ sub: Substring) -> String {
     return transTable[s, default: s]
 }
 
+/// Return a new String with any romanized Hebrew converted into Hebrew letters.
+/// | letters | letters | letters | letters |
+/// | ------- | -------- | -------- | ------- |
+/// |  A  = aleph |  B  = beth |   G  = gimel  |   D  = dalet |
+/// | H  = heh  |   V  = vav   |  Z  = zayin   | Ch = chet  |
+/// | T  = teth  |   I  = yod   |  K  = kaf   |  L  = lamed |
+/// | M  = mem  |  N  = nun  | S  = samekh | O  = ayin |
+/// | P  = peh   |  Tz = tzaddi  | Q  = qoph   |  R  = resh |
+/// |Sh = shin   | Th = tav | | |
+///
+/// | Ligatures |
+/// |---------|
+/// | Ii = yod-yod |
+/// | Vi = vav-yod |
+/// | Vv = vav-vav |
+///
+/// | niqqud | niqqud |
+/// | ------ | ------- |
+/// | ;  = Sh'va   |             *  = Dagesh |
+/// | \\ =  Kubutz     |         `  = Holam |
+/// | 1  = Hiriq         |       2  = Zeire |
+/// | 3  = Segol        |        ;3 = Reduced Segol |
+/// | _  = Patach       |        ;_ = Reduced Patach |
+/// | 7  = Kamatz       |        ;7 = Reduced Kamatz |
+/// | Shl = Shin dot left |      Shr = Shin dot right |
+///
+/// (Use ;; to escape an actual semicolon)
+///
+/// Letters which can be final can take a 'f' or 'i' prefix to
+/// force the interpretation to be 'final' or 'initial'... otherwise
+/// a letter at the end of a word is considered final.
+///
+/// - Parameter str: the input string
+/// - Returns: The Hebrew-ized string
 public func unromanizeHebrew(_ str: some StringProtocol) -> String {
     // first, add automatic final letters
     var hebrew = String(str)
-    hebrew.replace(INFERRED_FINAL) { match in
+    hebrew.replace(inferredFinalRx) { match in
         match.0 + "f"
     }
-    hebrew.replace(TRANSLITERATE) { match in
+    hebrew.replace(transliterationRx) { match in
         defLookup(match.1) + defLookup(match.2) + defLookup(match.3)
     }
     return hebrew
