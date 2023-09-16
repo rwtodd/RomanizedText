@@ -58,7 +58,7 @@ let inferredFinalRx = Regex {
 let transliterationRx = Regex {
     Capture {
         ("A"..."Z")
-        ZeroOrMore(.anyOf("fhilvz"), .possessive)
+        ZeroOrMore(.anyOf("fhilrvz"), .possessive)
     }
     Capture {
         Optionally(niqqudRx, .possessive)

@@ -8,6 +8,7 @@ final class RomanizedHebrewTests: XCTestCase {
         XCTAssertEqual(unromanizeHebrew("B"), "\u{5d1}")
         XCTAssertEqual(unromanizeHebrew("G"), "\u{5d2}")
         XCTAssertEqual(unromanizeHebrew("ABG"), "\u{5d0}\u{5d1}\u{5d2}")
+        XCTAssertEqual(unromanizeHebrew("Shr"), "\u{05e9}\u{05c1}")
     }
     
     func testAutoFinals() throws {
