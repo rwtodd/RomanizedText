@@ -1,5 +1,5 @@
 import XCTest
-import RomanizedHebrew
+import RomanizedText
 
 final class RomanizedHebrewTests: XCTestCase {
     
