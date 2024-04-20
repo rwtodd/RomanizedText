@@ -42,8 +42,8 @@ func doHeb(_ i: String) {
 
     let u = unromanizeHebrew(i)
     print(u)
-    let html = u.unicodeScalars.map {
-        "&#x\(String($0.value, radix: 16, uppercase: false));"
+    let html = u.unicodeScalars.map { scalar in
+        scalar.value < 255 ?  String(scalar) : "&#x\(String(scalar.value, radix: 16, uppercase: false));"
     }.joined()
     print("{{hebrew text|\(html)}}")
 }
