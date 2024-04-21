@@ -14,7 +14,7 @@ final class RomanizedHebrewTests: XCTestCase {
     func testAutoFinals() throws {
         XCTAssertEqual(unromanizeHebrew("AN BNM"), "אן בנם")
         XCTAssertEqual(unromanizeHebrew("ANf BNiMf"), "אן בנם")
-        // XCTAssertEqual(unromanizeHebrew("Th*1Pi;A3R3Th"), unromanizeHebrew("Th*1P;A3R3Th")) // the Peh should not be finalized
+        XCTAssertEqual(unromanizeHebrew("Th*1P;A3R3Th"), unromanizeHebrew("Th*1Pi;A3R3Th")) // the Peh should not be finalized
     }
 
     func testNiqqod() throws {

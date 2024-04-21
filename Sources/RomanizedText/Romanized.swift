@@ -47,7 +47,7 @@ let hebNiqqudRx = ChoiceOf {
 let hebInferredFinalRx = Regex {
     ChoiceOf { "K"; "M"; "N"; "P"; "Tz" }
     Lookahead {
-        ZeroOrMore(hebNiqqudRx,.possessive)
+        Local { ZeroOrMore(hebNiqqudRx) }
         ChoiceOf {
             One(.word.inverted)
             Anchor.endOfSubjectBeforeNewline
@@ -61,10 +61,10 @@ let hebTransliterationRx = Regex {
         ZeroOrMore(.anyOf("fhilrvz"), .possessive)
     }
     Capture {
-        Optionally(hebNiqqudRx, .possessive)
+        Local { Optionally(hebNiqqudRx) }
     }
     Capture {
-        Optionally(hebNiqqudRx, .possessive)
+        Local { Optionally(hebNiqqudRx) }
     }
 }
 
@@ -170,22 +170,20 @@ let sigmaFinalRx = Regex {
         "S"
     }
     Lookahead {
-            ZeroOrMore(graccRx, .possessive)
-            ChoiceOf {
-                One(.word.inverted)
-                Anchor.endOfSubjectBeforeNewline
-            }
+        Local { ZeroOrMore(graccRx) }
+        ChoiceOf {
+            One(.word.inverted)
+            Anchor.endOfSubjectBeforeNewline
+        }
     }
 }
 
 let greekTokenxRx = Regex {
     Capture {
-        Optionally(.possessive) {
-            "*"
-        }
+        Local { Optionally { "*" } }
     }
     Capture {
-        ZeroOrMore(graccRx,.possessive)
+        Local { ZeroOrMore(graccRx) }
     }
     Capture {
         Local {
@@ -196,7 +194,7 @@ let greekTokenxRx = Regex {
         }
     }
     Capture {
-        ZeroOrMore(graccRx,.possessive)
+        Local { ZeroOrMore(graccRx) }
     }
 }
 
